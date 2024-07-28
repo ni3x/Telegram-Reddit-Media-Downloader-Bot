@@ -1,6 +1,5 @@
-# 
 
-### Telegram Reddit Media Downloader Bot
+# Telegram Reddit Media Downloader Bot
 
 **Telegram Reddit Media Downloader Bot** is a Telegram bot that downloads and sends media (images, videos, and gifs) from Reddit posts directly to your Telegram chat. Built with Python, this bot utilizes the [`bulk-downloader-for-reddit
 `](https://github.com/Serene-Arc/bulk-downloader-for-reddit) tool for media downloading and ensures seamless media handling with retry mechanisms and efficient logging.
@@ -44,6 +43,12 @@
    ```json
    {
       "bot_token": "YOUR_TELEGRAM_BOT_API_TOKEN"
+   } 
+   ```
+- Create a users.json file in the root directory with your allowed users list:
+   ```json
+   {
+      "allowed_users": [123456,654321]
    } 
    ```
 6. Run the bot::

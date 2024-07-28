@@ -16,6 +16,12 @@ def load_config(filename: str) -> Dict[str, str]:
     with open(filename, 'r') as f:
         return json.load(f)
 
+def load_allowed_users(filename: str) -> set:
+    """Load the allowed user IDs from a JSON file."""
+    with open(filename, 'r') as f:
+        data = json.load(f)
+    return set(data.get('allowed_users', []))
+
 def download_reddit_media(reddit_url: str, download_dir: str) -> None:
     """Download media from a Reddit URL using bdfr."""
     if not os.path.exists(download_dir):
@@ -49,9 +55,9 @@ async def send_media(context: CallbackContext, chat_id: int, media_group: List[U
         except RetryAfter as e:
             print(f"Flood control exceeded. Retrying in {e.retry_after} seconds...")
             time.sleep(e.retry_after)
-        # except TelegramError as e:
-        #     print(f"Telegram error: {e.message}")
-        #     break
+        except TelegramError as e:
+            print(f"Telegram error: {e.message}")
+            break
 
 async def send_animation(context: CallbackContext, chat_id: int, animation: InputFile) -> None:
     """Send an animation with retry mechanism."""
@@ -62,9 +68,9 @@ async def send_animation(context: CallbackContext, chat_id: int, animation: Inpu
         except RetryAfter as e:
             print(f"Flood control exceeded. Retrying in {e.retry_after} seconds...")
             time.sleep(e.retry_after)
-        # except TelegramError as e:
-        #     print(f"Telegram error: {e.message}")
-        #     break
+        except TelegramError as e:
+            print(f"Telegram error: {e.message}")
+            break
 
 def remove_query_parameters(url: str) -> str:
     """Remove query parameters from the URL."""
@@ -86,6 +92,16 @@ def get_final_url(url: str) -> str:
 
 async def handle_message(update: Update, context: CallbackContext) -> None:
     """Handle incoming messages, download and send media from Reddit links."""
+
+    user_id = update.message.from_user.id
+    
+    users_path = 'users.json'
+    allowed_users = load_allowed_users(users_path)
+
+    if user_id not in allowed_users:
+        await update.message.reply_text("You are not authorized to use this bot.")
+        return
+    
     message_text = update.message.text
     chat_id = update.message.chat_id
     user_url_message = update.message.message_id
@@ -173,7 +189,7 @@ def main() -> None:
     """Main function to run the bot."""
     config = load_config('config.json')
     bot_token = config['bot_token']
-
+   
     application = Application.builder().token(bot_token).build()
     print("Bot has started...")
 
